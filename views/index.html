@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vidit</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <header>
+        <div class="container header-content">
+            <h1 class="logo">Vidit</h1>
+            <input type="text" id="keyword-search" class="keyword-search"
+                placeholder="Escribe tus palabras clave aquí...">
+            <button onclick="window.location.reload()" class="reload-btn">Volver a cargar</button>
+        </div>
+    </header>
+
+    <main class="container">
+        {{if .Articles}}
+        <div class="mosaic">
+            {{range .Articles}}
+            <article class="card card-score-{{.Score}}">
+                <div class="card-header">
+                    <span class="feed-badge">{{.Feed.Name}}</span>
+                </div>
+
+                <h2 class="card-title">
+                    <a href="{{.URL}}" target="_blank" rel="noopener">{{.Title}}</a>
+                </h2>
+
+                <div class="card-footer">
+                    <time datetime="{{.PublishedAt.Format " 2006-01-02T15:04:05Z07:00"}}">
+                        {{spanishDate .PublishedAt}}
+                    </time>
+                </div>
+            </article>
+            {{end}}
+        </div>
+        {{else}}
+        <div class="empty-state">
+            <h2>Aún no hay artículos</h2>
+            <p>Haz clic en "Actualizar Fuentes" para traer las últimas noticias</p>
+        </div>
+        {{end}}
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>{{.Count}} artículos mostrados</p>
+        </div>
+    </footer>
+
+    <script>
+        // Filtrado por keywords
+        document.getElementById('keyword-search').addEventListener('input', function () {
+            const keywords = this.value.toLowerCase().split(',').map(k => k.trim()).filter(k => k);
+            const cards = document.querySelectorAll('.card');
+
+            cards.forEach(card => {
+                const title = card.querySelector('.card-title').textContent.toLowerCase();
+                const source = card.querySelector('.feed-badge').textContent.toLowerCase();
+
+                if (keywords.length === 0) {
+                    card.style.display = '';
+                } else {
+                    const matches = keywords.some(keyword =>
+                        title.includes(keyword) || source.includes(keyword)
+                    );
+                    card.style.display = matches ? '' : 'none';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

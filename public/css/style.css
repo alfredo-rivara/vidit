@@ -1,0 +1,314 @@
+/* ========================================
+   VIDIT - Living News Mosaic Styles
+   ======================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:wght@400;600;700&display=swap');
+
+:root {
+    --primary-color: #000000;
+    --bg-dark: #e7e5df;
+    --bg-card: #e7e5df;
+    --text-primary: #000000;
+    --text-secondary: #333333;
+    --border-color: #e7e5df;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Newsreader', Georgia, serif;
+    background: #e7e5df;
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* ========================================
+   HEADER
+   ======================================== */
+
+header {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e7e5df;
+    padding: 15px 0;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+    color: #000000;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.keyword-search {
+    flex: 1;
+    max-width: 600px;
+    padding: 8px 12px;
+    border: 1px solid transparent;
+    border-radius: 0;
+    font-family: 'Newsreader', serif;
+    font-size: 1.1rem;
+    background: #e7e5df;
+    color: #000000;
+    transition: border-color 0.2s ease;
+}
+
+.keyword-search:focus {
+    outline: none;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.keyword-search::placeholder {
+    color: #999999;
+    font-size: 1.1rem;
+}
+
+.reload-btn {
+    padding: 8px 16px;
+    background: #e7e5df;
+    color: #000000;
+    border: 1px solid #000000;
+    border-radius: 0;
+    font-family: 'Newsreader', serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    margin-left: auto;
+}
+
+.reload-btn:hover {
+    background: #000000;
+    color: #e7e5df;
+}
+
+/* ========================================
+   MASONRY GRID LAYOUT
+   ======================================== */
+
+.mosaic {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-auto-rows: 100px;
+    gap: 4px;
+    /* CRITICAL: Tight spacing like Dixit */
+    grid-auto-flow: dense;
+    /* CRITICAL: Fill gaps tightly */
+}
+
+/* ========================================
+   CARD STYLES
+   ======================================== */
+
+.card {
+    background: #e7e5df;
+    border: 1px solid #e7e5df;
+    border-radius: 0;
+    padding: 16px;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    color: #000000;
+}
+
+.card:hover {
+    background: #000000;
+    color: #e7e5df;
+    border-color: #000000;
+    transform: none;
+}
+
+.card:hover .card-title a,
+.card:hover .feed-badge,
+.card:hover .score-indicator,
+.card:hover .card-footer time {
+    color: #e7e5df;
+}
+
+/* Score-based grid sizing - MORE VARIETY */
+.card-score-1 {
+    grid-column: span 1;
+    grid-row: span 1;
+}
+
+.card-score-2 {
+    grid-column: span 2;
+    grid-row: span 1;
+}
+
+.card-score-3 {
+    grid-column: span 2;
+    grid-row: span 2;
+}
+
+/* ========================================
+   CARD CONTENT
+   ======================================== */
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 8px;
+}
+
+.feed-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 0;
+    background: transparent;
+    color: #000000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid #000000;
+}
+
+.score-indicator {
+    font-size: 0.75rem;
+    color: #000000;
+    font-weight: 600;
+}
+
+.card-title {
+    font-size: 0.95rem;
+    line-height: 1.3;
+    flex: 1;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #000000;
+}
+
+.card-title a {
+    color: #000000;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.card:hover .card-title a {
+    color: #e7e5df;
+}
+
+.card-footer {
+    margin-top: auto;
+    padding-top: 6px;
+    border-top: 1px solid #e7e5df;
+}
+
+.card:hover .card-footer {
+    border-top-color: #333333;
+}
+
+.card-footer time {
+    font-size: 0.75rem;
+    color: #666666;
+    font-weight: 500;
+}
+
+/* Larger cards get bigger text */
+.card-score-3 .card-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.card-score-2 .card-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+/* ========================================
+   EMPTY STATE
+   ======================================== */
+
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: var(--shadow-md);
+}
+
+.empty-state h2 {
+    font-size: 2rem;
+    margin-bottom: 12px;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+/* ========================================
+   FOOTER
+   ======================================== */
+
+footer {
+    margin-top: 60px;
+    padding-top: 20px;
+    text-align: center;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--border-color);
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .mosaic {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        grid-auto-rows: 80px;
+    }
+
+    .card-score-1,
+    .card-score-2,
+    .card-score-3 {
+        grid-column: span 1;
+    }
+
+    .card-score-2 {
+        grid-row: span 2;
+    }
+
+    .card-score-3 {
+        grid-row: span 2;
+    }
+
+    .logo {
+        font-size: 2.5rem;
+    }
+
+    .card-title {
+        font-size: 0.85rem !important;
+    }
+}
