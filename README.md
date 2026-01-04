@@ -85,6 +85,32 @@ Click the **"🔄 Refresh Feeds"** button in the UI or use:
 curl -X POST http://localhost:3000/fetch
 ```
 
+## 🐳 Deployment (Podman / Docker)
+
+Vidit is container-ready. To deploy on RHEL using Podman (or Docker elsewhere):
+
+### 1. Build and Run via Compose
+
+```bash
+# Start App and Database
+podman-compose up -d --build
+```
+
+The application will be available at **http://localhost:3000**.
+
+### 2. Manual Podman Run
+
+```bash
+# Build Image
+podman build -t vidit .
+
+# Run DB
+podman run -d --name vidit-db -e POSTGRES_PASSWORD=secret postgres:15-alpine
+
+# Run App (Link to DB)
+podman run -d -p 3000:3000 --env-file .env --link vidit-db:db vidit
+```
+
 ## 🧠 The "Vidit" Algorithm
 
 1. **Concurrent Fetching**: All RSS feeds are fetched in parallel using goroutines

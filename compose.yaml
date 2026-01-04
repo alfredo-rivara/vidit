@@ -1,0 +1,38 @@
+services:
+  app:
+    container_name: vidit_app
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_HOST=db
+      - DB_USER=vidit
+      - DB_PASSWORD=vidit_secret
+      - DB_NAME=vidit
+      - DB_PORT=5432
+      - DB_SSLMODE=disable
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - vidit_net
+
+  db:
+    container_name: vidit_db
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=vidit
+      - POSTGRES_PASSWORD=vidit_secret
+      - POSTGRES_DB=vidit
+    volumes:
+      - vidit_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - vidit_net
+
+volumes:
+  vidit_data:
+
+networks:
+  vidit_net:
+    driver: bridge
