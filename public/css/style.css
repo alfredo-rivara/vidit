@@ -190,7 +190,9 @@ dialog::backdrop {
 /* Filter Dropdown */
 .filter-wrapper {
     position: relative;
-    display: inline-block;
+    display: flex;
+    /* Changed from inline-block for better alignment */
+    align-items: center;
 }
 
 .filter-dropdown {
@@ -237,12 +239,20 @@ dialog::backdrop {
 
 .mosaic {
     display: grid;
-    /* Adjusted for roughly 4 columns on desktop (1400px / 4 ~= 350px) */
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    /* Increased height so text fits */
-    grid-auto-rows: 250px;
+    /* Mobile First: 1 column by default */
+    grid-template-columns: 1fr;
+    /* Let height be automatic based on content */
+    grid-auto-rows: auto;
     gap: 15px;
     grid-auto-flow: dense;
+}
+
+/* Horizontal Mobile / Tablet / Desktop */
+@media (min-width: 600px) {
+    .mosaic {
+        /* roughly 4 columns on desktop, 2 on tablet */
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
 }
 
 /* Featured Article (Cover Story) - Removed */
@@ -268,10 +278,20 @@ dialog::backdrop {
 }
 
 .card:hover {
-    background: #000000;
+    background: #D32F2F;
+    /* Requested Red */
     color: #e7e5df;
-    border-color: #000000;
-    transform: none;
+    border-color: #D32F2F;
+    transform: translateY(-2px);
+    box-shadow: 4px 4px 0px #D32F2F;
+}
+
+.card:hover .card-title a,
+.card:hover .feed-badge,
+.card:hover .score-indicator,
+.card:hover .card-footer time,
+.card:hover .source-type-badge {
+    color: #e7e5df;
 }
 
 .card:hover .card-title a,
@@ -429,12 +449,119 @@ footer {
    ======================================== */
 
 @media (max-width: 768px) {
-    .mosaic {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        grid-auto-rows: 80px;
+    .container {
+        padding: 0 15px;
     }
 
-    /* ... rest of media query ... */
+    .header-content {
+        flex-direction: column;
+        align-items: center;
+        /* Center everything */
+        gap: 10px;
+        /* Reduced gap */
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .logo {
+        text-align: center;
+        margin-right: 0;
+        margin-bottom: 0;
+        /* Remove bottom margin */
+        font-size: 2rem;
+        /* Slightly smaller logo for compact view */
+    }
+
+    .keyword-search {
+        max-width: 100%;
+        width: 100%;
+        /* Full width */
+        margin: 0;
+    }
+
+    .header-actions {
+        justify-content: space-between;
+        /* Spread buttons evenly or center? User said "buttons in third row" */
+        width: 100%;
+        margin-left: 0;
+        display: flex;
+        flex-wrap: nowrap;
+        /* Try to keep them on one line if possible */
+        gap: 5px;
+    }
+
+    .reload-btn,
+    .filter-btn,
+    .about-btn {
+        font-size: 0.8rem;
+        /* Smaller text */
+        padding: 6px 4px;
+        /* Minimal padding */
+        flex: 1;
+        /* Distribute space evenly */
+        text-align: center;
+        justify-content: center;
+        white-space: nowrap;
+        /* Prevent wrapping inside button */
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .filter-wrapper {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .filter-btn {
+        width: 100%;
+    }
+
+    /* SCROLL TRANSFORM: Compact Single Row */
+    .header-content.is-scrolled {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 5px;
+        padding-bottom: 5px;
+        gap: 5px;
+    }
+
+    .header-content.is-scrolled .keyword-search {
+        display: none;
+        /* Hide search */
+    }
+
+    .header-content.is-scrolled .logo {
+        font-size: 1.2rem;
+        /* Reduced from 1.4rem */
+        margin: 0;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .header-content.is-scrolled .header-actions {
+        width: auto;
+        /* Shrink to fit content */
+        margin-left: auto;
+        /* Push to right */
+        gap: 5px;
+        flex-shrink: 0;
+    }
+
+    /* Force buttons to show full text in compact mode */
+    .header-content.is-scrolled .reload-btn,
+    .header-content.is-scrolled .about-btn {
+        width: auto;
+        min-width: auto;
+        flex: 0 0 auto;
+        /* Do not shrink */
+        overflow: visible;
+        /* Show all text */
+        text-overflow: clip;
+        /* No ellipsis */
+        white-space: nowrap;
+        padding: 6px 8px;
+    }
 }
 
 /* Back to Top Button */

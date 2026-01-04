@@ -98,11 +98,19 @@ curl -X POST http://localhost:3000/fetch
 
 ## 🎨 Frontend Features
 
-- **CSS Grid Masonry Layout** with `grid-auto-flow: dense`
-- Cards span 1-2 columns and 1-2 rows based on score
-- Feed color-coded badges
-- Responsive design
-- Smooth hover animations
+- **Mobile First Design**: Optimized for single-column reading on mobile, expanding to multi-column masonry on larger screens.
+- **Sticky Compact Header**: Header transforms into a minimal navbar on scroll for distraction-free reading.
+- **Adaptive UI**: Smart favicon that adapts to system Dark Mode.
+- **CSS Grid Masonry Layout** with `grid-auto-flow: dense`.
+- **Feed color-coded badges** and standard interaction states.
+- **Font Awesome** integration.
+
+## 🛡️ Content Quality Control
+
+Vidit implements a hybrid **Gossip Filter** to maintain high signal-to-noise ratio:
+1. **Category Blocking**: Automatically skips articles from "Farándula", "Espectáculos", "Gente", etc.
+2. **Keyword Filtering**: Blocks Titles containing "zombie" terms like "Reality", "Influencer", "Escándalo", etc.
+3. **Deep Linking**: Direct access to original sources.
 
 ## 📝 Environment Variables
 

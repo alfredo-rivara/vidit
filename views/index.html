@@ -6,23 +6,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vidit</title>
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 </head>
 
 <body>
     <header>
         <div class="container header-content">
-            <h1 class="logo">Vidit</h1>
-            <input type="text" id="keyword-search" class="keyword-search"
-                placeholder="Escribe aquí tu búsqueda por palabras clave o fuentes...">
+            <h1 class="logo"><i class="fa-solid fa-newspaper"></i> Vidit</h1>
+            <input type="text" id="keyword-search" class="keyword-search" placeholder="Palabras clave...">
             <div class="header-actions">
                 <button id="about-btn" class="about-btn">Acerca de</button>
-                <div class="filter-wrapper">
+                <!-- <div class="filter-wrapper">
                     <button id="filter-btn" class="filter-btn">Fuentes ▾</button>
                     <div id="filter-dropdown" class="filter-dropdown">
-                        <!-- Checkboxes injected by JS -->
+                        Checkboxes injected by JS
                     </div>
-                </div>
-                <button onclick="window.location.reload()" class="reload-btn">Volver a cargar</button>
+                </div> -->
+                <button onclick="window.location.reload()" class="reload-btn">Recargar</button>
             </div>
         </div>
     </header>
@@ -41,6 +42,7 @@
                 la necesidad de información en tiempo real que quedó sin respuesta cuando el sitio desapareció.</p>
             <p>Recopilamos titulares de las fuentes más relevantes de Chile, América Latina y la hispanósfera en
                 general, además de titulares relativos a temas de ciberseguridad.</p>
+            <p>Seguiremos ampliando el repertorio de fuentes.</p>
             <p><strong>Privacidad:</strong> No rastreamos tu actividad ni utilizamos cookies de terceros.</p>
             <p><em>Versión 1.0.0</em></p>
         </div>
@@ -50,7 +52,7 @@
         {{if .Articles}}
         <div class="mosaic">
             {{range .Articles}}
-            <article class="card card-score-{{.Score}}">
+            <article class="card card-score-{{.Score}} category-{{.Feed.Category}}">
                 <div class="card-header">
                     <span class="feed-badge">{{.Feed.Name}}</span>
                     <span class="source-type-badge badge-{{.Feed.Type}}">{{if eq .Feed.Type
@@ -132,6 +134,8 @@
 
         // Build Dropdown
         function populateFilterMenu() {
+            if (!filterDropdown) return; // Guard clause if disabled
+
             const feeds = getFeeds();
             filterDropdown.innerHTML = '';
 
@@ -194,17 +198,19 @@
 
         function setupEventListeners() {
             // Toggle Dropdown
-            filterBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                filterDropdown.classList.toggle('show');
-                filterBtn.classList.toggle('active');
-            });
+            if (filterBtn) {
+                filterBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    filterDropdown.classList.toggle('show');
+                    filterBtn.classList.toggle('active');
+                });
+            }
 
             // Close dropdown when clicking outside
             document.addEventListener('click', (e) => {
-                if (!filterDropdown.contains(e.target) && e.target !== filterBtn) {
+                if (filterDropdown && !filterDropdown.contains(e.target) && e.target !== filterBtn) {
                     filterDropdown.classList.remove('show');
-                    filterBtn.classList.remove('active');
+                    if (filterBtn) filterBtn.classList.remove('active');
                 }
             });
 
@@ -217,11 +223,21 @@
 
             // Back to Top Visibility
             const backToTopBtn = document.getElementById('back-to-top');
+            const headerContent = document.querySelector('.header-content');
+
             window.addEventListener('scroll', () => {
+                // Back to Top
                 if (window.scrollY > 300) {
                     backToTopBtn.classList.add('visible');
                 } else {
                     backToTopBtn.classList.remove('visible');
+                }
+
+                // Compact Header on Mobile
+                if (window.scrollY > 50) {
+                    headerContent.classList.add('is-scrolled');
+                } else {
+                    headerContent.classList.remove('is-scrolled');
                 }
             });
         }

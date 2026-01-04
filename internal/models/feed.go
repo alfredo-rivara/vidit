@@ -15,8 +15,9 @@ type Feed struct {
 
 	Name          string     `gorm:"not null" json:"name"`
 	URL           string     `gorm:"not null;unique" json:"url"`
-	Type          string     `gorm:"default:'rss'" json:"type"`        // rss or sitemap
-	ColorHex      string     `gorm:"default:#3b82f6" json:"color_hex"` // Default blue
+	Type          string     `gorm:"default:'rss'" json:"type"`         // rss or sitemap
+	Category      string     `gorm:"default:'general'" json:"category"` // cybersecurity, international, latam, usa, china
+	ColorHex      string     `gorm:"default:#3b82f6" json:"color_hex"`  // Default blue
 	LastFetchedAt *time.Time `json:"last_fetched_at"`
 
 	// Relationships

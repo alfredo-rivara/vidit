@@ -114,7 +114,11 @@ func (s *Service) fetchFeed(feed models.Feed) []models.Article {
 		feedData, err = s.parser.ParseURL(feed.URL)
 		if err == nil {
 			articles = make([]models.Article, 0, len(feedData.Items))
-			for _, item := range feedData.Items {
+	// Filter Gossip
+				if s.isGossip(item.Title, item.Categories) {
+					continue
+				}
+
 				publishedAt := time.Now()
 				if item.PublishedParsed != nil {
 					publishedAt = *item.PublishedParsed
@@ -130,6 +134,17 @@ func (s *Service) fetchFeed(feed models.Feed) []models.Article {
 		}
 	}
 
+    // Filter Sitemaps (Keywords only)
+    if feed.Type == "sitemap" && len(articles) > 0 {
+        var filtered []models.Article
+        for _, a := range articles {
+            if !s.isGossip(a.Title, nil) {
+                filtered = append(filtered, a)
+            }
+        }
+        articles = filtered
+    }
+
 	if err != nil {
 		log.Printf("❌ Error fetching %s (%s): %v\n", feed.Name, feed.URL, err)
 		return nil
@@ -139,6 +154,39 @@ func (s *Service) fetchFeed(feed models.Feed) []models.Article {
 	database.DB.Model(&feed).Update("last_fetched_at", &now)
 
 	return articles
+}
+
+// Gossip Filter Lists
+var bannedKeywords = []string{
+	"gran hermano", "reality", "influencer", "tiktoker", "escándalo", "romance", "separación",
+	"viral", "redes explotan", "farándula", "chisme", "ex de", "novio de", "novia de",
+	"gh 202", "bomba", "infiel", "cuernos", "wandanara", "china suarez", "pampita",
+    "shakira", "piqué", "miley cyrus",
+}
+
+var bannedCategories = map[string]bool{
+	"gente": true, "farándula": true, "espectáculos": true, "celebrities": true,
+	"tiktok": true, "viral": true, "corazón": true, "famosos": true, "entretenimiento": true,
+    "tv": true, // Often reality TV
+}
+
+func (s *Service) isGossip(title string, categories []string) bool {
+    // 1. Check Categories
+    for _, cat := range categories {
+        if bannedCategories[strings.ToLower(cat)] {
+            return true
+        }
+    }
+
+    // 2. Check Title Keywords
+    titleLower := strings.ToLower(title)
+    for _, keyword := range bannedKeywords {
+        if strings.Contains(titleLower, keyword) {
+            return true
+        }
+    }
+
+    return false
 }
 
 func (s *Service) calculateScores(articles []models.Article) []models.Article {
