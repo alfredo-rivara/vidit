@@ -55,7 +55,6 @@ func main() {
 		{Name: "Euronews", URL: "https://es.euronews.com/rss", ColorHex: "#003D8F"},
 		{Name: "SwissInfo", URL: "https://www.swissinfo.ch/oai/rss/es/index.xml", ColorHex: "#FF0000"},
 		{Name: "Agencia SINC", URL: "https://www.agenciasinc.es/Sindicacion/Noticias", ColorHex: "#9DC63F"},
-		{Name: "PR Newswire", URL: "https://www.prnewswire.com/rss/news-releases-list.rss?lang=es", ColorHex: "#ED1C24"},
 		{Name: "Voz de América", URL: "https://www.vozdeamerica.com/api/z$gqqye_qvi_", ColorHex: "#003366"}, // URL updated
 		{Name: "Democracy Now", URL: "https://www.democracynow.org/es/datos/noticias.xml", ColorHex: "#B41F25"},
 		{Name: "Global Voices", URL: "https://es.globalvoices.org/feed/", ColorHex: "#2F3C44"},
@@ -67,8 +66,52 @@ func main() {
 		{Name: "Somos Télam", URL: "https://somostelam.com.ar/feed/", ColorHex: "#3399FF"},
 		{Name: "Telesur", URL: "https://www.telesurtv.net/rss/rss.xml", ColorHex: "#DA251D"},
 		{Name: "Infobae (LatAm)", URL: "https://www.infobae.com/feeds/rss/", ColorHex: "#FA6900"},
+		{Name: "Reforma (MX)", URL: "https://www.reforma.com/rss/portada.xml", ColorHex: "#FF6600"},
+		{Name: "La Jornada (MX)", URL: "https://www.jornada.com.mx/rss/edicion.xml", ColorHex: "#D4AF37"},
+		{Name: "El Comercio (PE)", URL: "https://www.elcomercio.pe/rss/", ColorHex: "#FFCC00"},
+		{Name: "Diario Red", URL: "https://diariored.canalred.tv/feed/", ColorHex: "#E60000"},
+		// Chile
+		{Name: "La Tercera", URL: "https://www.latercera.com/rss", ColorHex: "#000000"},
+		{Name: "BioBioChile", URL: "https://www.biobiochile.cl/feed", ColorHex: "#FFC300"}, // RSS fallback (Sitemap was Index)
+		{Name: "ADN Radio", URL: "https://www.adnradio.cl/arc/outboundfeeds/rss/", ColorHex: "#E71D25"},
+		{Name: "Turno (Copano)", URL: "https://copano.news/sitemap.xml", Type: "sitemap", ColorHex: "#000000"},
+		{Name: "Radio Agricultura", URL: "https://www.radioagricultura.cl/sitemap_news.xml", Type: "sitemap", ColorHex: "#2E7D32"},
 	}
 	feeds = append(feeds, latamFeeds...)
+
+	politicsESFeeds := []models.Feed{
+		{Name: "Politico (ES)", URL: "https://www.politico.eu/tag/spanish-politics/feed/", ColorHex: "#0C3C60"},
+		{Name: "El Periódico", URL: "https://www.elperiodico.com/es/rss/politica/rss.xml", ColorHex: "#005696"},
+		{Name: "elDiario.es", URL: "https://www.eldiario.es/rss/", ColorHex: "#121212"},
+		{Name: "InfoLibre", URL: "https://www.infolibre.es/rss/", ColorHex: "#D92B34"},
+		{Name: "HuffPost (ES)", URL: "https://www.huffingtonpost.es/feeds/index.xml", ColorHex: "#0D9578"},
+		{Name: "La Vanguardia", URL: "https://www.lavanguardia.com/rss/home.xml", ColorHex: "#072457"},
+		{Name: "20minutos", URL: "https://www.20minutos.es/rss/", ColorHex: "#1A4C8F"},
+		{Name: "Vozpópuli", URL: "https://www.vozpopuli.com/rss/", ColorHex: "#D50000"},
+	}
+	feeds = append(feeds, politicsESFeeds...)
+
+	sportsFeeds := []models.Feed{
+		{Name: "Marca", URL: "https://e00-marca.uecdn.es/rss/portada.xml", ColorHex: "#CC0000"},
+		{Name: "Sport", URL: "https://www.sport.es/es/rss/last-news/rss.xml", ColorHex: "#E40213"},
+		{Name: "Olé", URL: "https://www.ole.com.ar/rss/ultimas-noticias", ColorHex: "#689F38"},
+		{Name: "Fox Deportes", URL: "https://www.foxdeportes.com/rss/home.xml", ColorHex: "#003366"},
+	}
+	feeds = append(feeds, sportsFeeds...)
+
+	securityFeeds := []models.Feed{
+		{Name: "El Lado del Mal", URL: "https://www.elladodelmal.com/feeds/posts/default", ColorHex: "#000000"},
+		{Name: "Security By Default", URL: "http://feeds.feedburner.com/SecurityByDefault", ColorHex: "#333333"},
+		{Name: "DragonJAR", URL: "https://www.dragonjar.org/feed", ColorHex: "#990000"},
+		{Name: "Una al Día", URL: "https://unaaldia.hispasec.com/feed", ColorHex: "#0066CC"},
+		{Name: "Segu-Info", URL: "https://blog.segu-info.com.ar/feeds/posts/default", ColorHex: "#FF6600"},
+		{Name: "HackPlayers", URL: "https://www.hackplayers.com/feeds/posts/default", ColorHex: "#000000"},
+		{Name: "WeLiveSecurity", URL: "https://www.welivesecurity.com/la-es/feed/", ColorHex: "#0099CC"},
+		{Name: "Kaspersky Blog", URL: "https://www.kaspersky.es/blog/feed/", ColorHex: "#006D55"},
+		{Name: "INCIBE Avisos", URL: "https://www.incibe.es/feed/avisos-seguridad", ColorHex: "#00537F"},
+		{Name: "Ciberseguridad Blog", URL: "https://ciberseguridad.blog/feed/", ColorHex: "#444444"},
+	}
+	feeds = append(feeds, securityFeeds...)
 
 	for _, feed := range feeds {
 		result := database.DB.FirstOrCreate(&feed, models.Feed{URL: feed.URL})

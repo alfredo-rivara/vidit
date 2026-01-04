@@ -103,26 +103,36 @@ func (s *Service) FetchAllFeeds(db *gorm.DB) error {
 }
 
 func (s *Service) fetchFeed(feed models.Feed) []models.Article {
-	feedData, err := s.parser.ParseURL(feed.URL)
+	var articles []models.Article
+	var err error
+
+	if feed.Type == "sitemap" {
+		articles, err = s.fetchSitemap(feed)
+	} else {
+		// Default to RSS
+		var feedData *gofeed.Feed
+		feedData, err = s.parser.ParseURL(feed.URL)
+		if err == nil {
+			articles = make([]models.Article, 0, len(feedData.Items))
+			for _, item := range feedData.Items {
+				publishedAt := time.Now()
+				if item.PublishedParsed != nil {
+					publishedAt = *item.PublishedParsed
+				}
+				articles = append(articles, models.Article{
+					Title:       item.Title,
+					URL:         item.Link,
+					PublishedAt: publishedAt,
+					FeedID:      feed.ID,
+					Score:       1,
+				})
+			}
+		}
+	}
+
 	if err != nil {
 		log.Printf("❌ Error fetching %s (%s): %v\n", feed.Name, feed.URL, err)
 		return nil
-	}
-
-	articles := make([]models.Article, 0, len(feedData.Items))
-	for _, item := range feedData.Items {
-		publishedAt := time.Now()
-		if item.PublishedParsed != nil {
-			publishedAt = *item.PublishedParsed
-		}
-
-		articles = append(articles, models.Article{
-			Title:       item.Title,
-			URL:         item.Link,
-			PublishedAt: publishedAt,
-			FeedID:      feed.ID,
-			Score:       1, // Default score
-		})
 	}
 
 	now := time.Now()

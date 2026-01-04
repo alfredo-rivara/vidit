@@ -13,10 +13,38 @@
         <div class="container header-content">
             <h1 class="logo">Vidit</h1>
             <input type="text" id="keyword-search" class="keyword-search"
-                placeholder="Escribe tus palabras clave aquí...">
-            <button onclick="window.location.reload()" class="reload-btn">Volver a cargar</button>
+                placeholder="Escribe aquí tu búsqueda por palabras clave o fuentes...">
+            <div class="header-actions">
+                <button id="about-btn" class="about-btn">Acerca de</button>
+                <div class="filter-wrapper">
+                    <button id="filter-btn" class="filter-btn">Fuentes ▾</button>
+                    <div id="filter-dropdown" class="filter-dropdown">
+                        <!-- Checkboxes injected by JS -->
+                    </div>
+                </div>
+                <button onclick="window.location.reload()" class="reload-btn">Volver a cargar</button>
+            </div>
         </div>
     </header>
+
+    <button id="back-to-top" class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑ Volver al
+        inicio</button>
+
+    <!-- About Modal -->
+    <dialog id="about-modal" class="modal">
+        <div class="modal-content">
+            <button id="close-modal" class="close-btn">×</button>
+            <h2>Acerca de Vidit</h2>
+            <p>Vidit es un agregador de noticias minimalista diseñado para ofrecer una lectura rápida y sin
+                distracciones. Está directamente inspirado por el maravilloso y extinto 'Dixit.io' y
+                la necesidad de información en tiempo real en el contexto de la invasión
+                estadounidense a Venezuela (2026).</p>
+            <p>Recopilamos titulares de las fuentes más relevantes de Chile, América Latina y la hispanósfera en
+                general.</p>
+            <p><strong>Privacidad:</strong> No rastreamos tu actividad ni utilizamos cookies de terceros.</p>
+            <p><em>Versión 1.0.0</em></p>
+        </div>
+    </dialog>
 
     <main class="container">
         {{if .Articles}}
@@ -25,6 +53,8 @@
             <article class="card card-score-{{.Score}}">
                 <div class="card-header">
                     <span class="feed-badge">{{.Feed.Name}}</span>
+                    <span class="source-type-badge badge-{{.Feed.Type}}">{{if eq .Feed.Type
+                        ""}}RSS{{else}}{{.Feed.Type}}{{end}}</span>
                 </div>
 
                 <h2 class="card-title">
@@ -54,25 +84,149 @@
     </footer>
 
     <script>
+        // Modal Logic
+        const aboutBtn = document.getElementById('about-btn');
+        const aboutModal = document.getElementById('about-modal');
+        const closeModal = document.getElementById('close-modal');
+
+        aboutBtn.addEventListener('click', () => {
+            aboutModal.showModal();
+        });
+
+        closeModal.addEventListener('click', () => {
+            aboutModal.close();
+        });
+
+        aboutModal.addEventListener('click', (e) => {
+            if (e.target === aboutModal) {
+                aboutModal.close();
+            }
+        });
+
         // Filtrado por keywords
-        document.getElementById('keyword-search').addEventListener('input', function () {
-            const keywords = this.value.toLowerCase().split(',').map(k => k.trim()).filter(k => k);
-            const cards = document.querySelectorAll('.card');
+        // State
+        let hiddenFeeds = new Set();
+        let searchKeywords = [];
 
+        // DOM Elements
+        const keywordSearch = document.getElementById('keyword-search');
+        const filterBtn = document.getElementById('filter-btn');
+        const filterDropdown = document.getElementById('filter-dropdown');
+        const cards = document.querySelectorAll('.card');
+
+        // Initialize
+        function init() {
+            populateFilterMenu();
+            setupEventListeners();
+        }
+
+        // Get unique feeds from current DOM
+        function getFeeds() {
+            const feeds = new Set();
             cards.forEach(card => {
-                const title = card.querySelector('.card-title').textContent.toLowerCase();
-                const source = card.querySelector('.feed-badge').textContent.toLowerCase();
+                const feedName = card.querySelector('.feed-badge').textContent.trim();
+                feeds.add(feedName);
+            });
+            return Array.from(feeds).sort();
+        }
 
-                if (keywords.length === 0) {
-                    card.style.display = '';
+        // Build Dropdown
+        function populateFilterMenu() {
+            const feeds = getFeeds();
+            filterDropdown.innerHTML = '';
+
+            feeds.forEach(feed => {
+                const label = document.createElement('label');
+                label.className = 'filter-option';
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = true; // Default visible
+                checkbox.dataset.feed = feed;
+
+                checkbox.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        hiddenFeeds.delete(feed);
+                    } else {
+                        hiddenFeeds.add(feed);
+                    }
+                    applyFilters();
+                });
+
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(feed));
+                filterDropdown.appendChild(label);
+            });
+        }
+
+        // Helper to remove accents/diacritics
+        function normalizeText(text) {
+            return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        }
+
+        // Apply visual filtering
+        function applyFilters() {
+            cards.forEach(card => {
+                const titleOriginal = card.querySelector('.card-title').textContent;
+                const feedOriginal = card.querySelector('.feed-badge').textContent.trim();
+
+                const titleNorm = normalizeText(titleOriginal);
+                const feedNorm = normalizeText(feedOriginal);
+
+                // 1. Check if feed is hidden
+                // distinct feeds are tracked by exact string in hiddenFeeds
+                if (hiddenFeeds.has(feedOriginal)) {
+                    card.style.display = 'none';
+                    return;
+                }
+
+                // 2. Check search keywords
+                if (searchKeywords.length === 0) {
+                    card.style.display = ''; // Show if not hidden by feed filter
                 } else {
-                    const matches = keywords.some(keyword =>
-                        title.includes(keyword) || source.includes(keyword)
+                    const matches = searchKeywords.some(k =>
+                        titleNorm.includes(k) || feedNorm.includes(k)
                     );
                     card.style.display = matches ? '' : 'none';
                 }
             });
-        });
+        }
+
+        function setupEventListeners() {
+            // Toggle Dropdown
+            filterBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                filterDropdown.classList.toggle('show');
+                filterBtn.classList.toggle('active');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!filterDropdown.contains(e.target) && e.target !== filterBtn) {
+                    filterDropdown.classList.remove('show');
+                    filterBtn.classList.remove('active');
+                }
+            });
+
+            // Search Input
+            keywordSearch.addEventListener('input', function () {
+                // Normalize input keywords too
+                searchKeywords = this.value.split(',').map(k => normalizeText(k.trim())).filter(k => k);
+                applyFilters();
+            });
+
+            // Back to Top Visibility
+            const backToTopBtn = document.getElementById('back-to-top');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    backToTopBtn.classList.add('visible');
+                } else {
+                    backToTopBtn.classList.remove('visible');
+                }
+            });
+        }
+
+        init();
     </script>
 </body>
 

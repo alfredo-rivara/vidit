@@ -80,6 +80,29 @@ func main() {
 	e.GET("/", handleHome)
 	e.POST("/fetch", handleFetch)
 
+	// Start background fetcher
+	go func() {
+		// Initial fetch after server starts (give it a moment to settle)
+		time.Sleep(5 * time.Second)
+		log.Println("🔄 Starting background feed fetcher...")
+		
+		service := fetcher.NewService()
+		if err := service.FetchAllFeeds(database.DB); err != nil {
+			log.Printf("❌ Initial fetch failed: %v\n", err)
+		}
+
+		// Periodic fetch
+		ticker := time.NewTicker(15 * time.Minute)
+		defer ticker.Stop()
+
+		for range ticker.C {
+			log.Println("🔄 Starting periodic feed fetch...")
+			if err := service.FetchAllFeeds(database.DB); err != nil {
+				log.Printf("❌ Periocic fetch failed: %v\n", err)
+			}
+		}
+	}()
+
 	port := getEnv("PORT", "3000")
 	log.Printf("🚀 Vidit server starting on http://localhost:%s\n", port)
 	e.Logger.Fatal(e.Start(":" + port))
