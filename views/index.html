@@ -51,21 +51,49 @@
     <main class="container">
         {{if .Articles}}
         <div class="mosaic">
-            {{range .Articles}}
-            <article class="card card-score-{{.Score}} category-{{.Feed.Category}}">
+            {{range $index, $article := .Articles}}
+
+            {{/* Insert Mastodon Card at Index 3 (4th position) if trends exist */}}
+            {{if and (eq $index 3) $.MastodonTrends}}
+            <div class="card mastodon-card" style="grid-row: span 1;">
+                <div class="mastodon-header">
+                    <span class="mastodon-icon">🐘</span>
+                    <span>Mastodon Trends</span>
+                </div>
+
+                <div class="mastodon-carousel">
+                    {{range $mIndex, $post := $.MastodonTrends}}
+                    <div class="mastodon-slide {{if eq $mIndex 0}}active{{end}}">
+                        <div class="mastodon-content">
+                            {{/* Content is HTML from API */}}
+                            <div class="post-text">{{$post.Content | safeHTML}}</div>
+                            <div class="post-meta">
+                                <span class="author">@{{$post.Account.DisplayName}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+            {{end}}
+
+            <article class="card card-score-{{$article.Score}} category-{{$article.Feed.Category}}"
+                data-origin="{{if eq $article.Feed.Type ""}}rss{{else}}{{$article.Feed.Type}}{{end}}">
                 <div class="card-header">
-                    <span class="feed-badge">{{.Feed.Name}}</span>
-                    <span class="source-type-badge badge-{{.Feed.Type}}">{{if eq .Feed.Type
-                        ""}}RSS{{else}}{{.Feed.Type}}{{end}}</span>
+                    <span class="feed-badge">{{$article.Feed.Name}}</span>
+                    <span class="source-type-badge badge-{{$article.Feed.Type}}">{{if eq $article.Feed.Type
+                        ""}}RSS{{else}}{{$article.Feed.Type}}{{end}}</span>
+                    <span class="score-badge" style="font-size: 0.8em; color: #666; margin-left: 5px;"
+                        title="Gravity Score">{{formatScore $article.Score}}</span>
                 </div>
 
                 <h2 class="card-title">
-                    <a href="{{.URL}}" target="_blank" rel="noopener">{{.Title}}</a>
+                    <a href="{{$article.URL}}" target="_blank" rel="noopener">{{$article.Title}}</a>
                 </h2>
 
                 <div class="card-footer">
-                    <time datetime="{{.PublishedAt.Format " 2006-01-02T15:04:05Z07:00"}}">
-                        {{spanishDate .PublishedAt}}
+                    <time datetime="{{$article.PublishedAt.Format " 2006-01-02T15:04:05Z07:00"}}">
+                        {{spanishDate $article.PublishedAt}}
                     </time>
                 </div>
             </article>
@@ -189,11 +217,24 @@
                     card.style.display = ''; // Show if not hidden by feed filter
                 } else {
                     const matches = searchKeywords.some(k =>
-                        titleNorm.includes(k) || feedNorm.includes(k)
+                        titleNorm.includes(k) || feedNorm.includes(k) || checkOriginMatch(card, k)
                     );
                     card.style.display = matches ? '' : 'none';
                 }
             });
+        }
+
+        // Check if keyword matches origin alias
+        function checkOriginMatch(card, keyword) {
+            const origin = card.dataset.origin || 'rss';
+
+            // Aliases
+            if (keyword === 'xml' && origin === 'sitemap') return true;
+            if (keyword === 'api' && origin === 'newsapi') return true;
+            if (keyword === 'rss' && origin === 'rss') return true;
+
+            // Direct match (optional, if user types 'newsapi' directly)
+            return origin.includes(keyword);
         }
 
         function setupEventListeners() {
@@ -242,7 +283,23 @@
             });
         }
 
+        // Mastodon Carousel Logic
+        function initCarousel() {
+            const slides = document.querySelectorAll('.mastodon-slide');
+            if (slides.length === 0) return;
+
+            let currentIndex = 0;
+            const intervalTime = 5000; // 5 seconds
+
+            setInterval(() => {
+                slides[currentIndex].classList.remove('active');
+                currentIndex = (currentIndex + 1) % slides.length;
+                slides[currentIndex].classList.add('active');
+            }, intervalTime);
+        }
+
         init();
+        initCarousel();
     </script>
 </body>
 

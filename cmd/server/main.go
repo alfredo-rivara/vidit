@@ -10,7 +10,10 @@ import (
 	"time"
 	"vidit/internal/database"
 	"vidit/internal/fetcher"
+	"vidit/internal/mastodon"
 	"vidit/internal/models"
+
+	gomastodon "github.com/mattn/go-mastodon"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -66,6 +69,12 @@ func main() {
 			}
 			return fmt.Sprintf("%02d %s %02d:%02d", t.Day(), months[t.Month()], t.Hour(), t.Minute())
 		},
+		"formatScore": func(score float64) string {
+			return fmt.Sprintf("%.2f", score)
+		},
+		"safeHTML": func(s string) template.HTML {
+			return template.HTML(s)
+		},
 	}
 
 	e.Renderer = &TemplateRenderer{
@@ -85,7 +94,7 @@ func main() {
 		// Initial fetch after server starts (give it a moment to settle)
 		time.Sleep(5 * time.Second)
 		log.Println("🔄 Starting background feed fetcher...")
-		
+
 		service := fetcher.NewService()
 		if err := service.FetchAllFeeds(database.DB); err != nil {
 			log.Printf("❌ Initial fetch failed: %v\n", err)
@@ -114,16 +123,33 @@ func handleHome(c echo.Context) error {
 	result := database.DB.
 		Preload("Feed").
 		Order("score DESC, published_at DESC").
-		Limit(500).
+		Limit(100).
 		Find(&articles)
 
 	if result.Error != nil {
 		return c.String(http.StatusInternalServerError, "Error loading articles")
 	}
 
+	// Fetch Mastodon Trends for the top article
+	var mastodonTrends []*gomastodon.Status
+	if len(articles) > 0 {
+		ms := mastodon.NewService()
+		// Improved keyword extraction: Try top article
+		kw := mastodon.ExtractKeywords(articles[0].Title)
+		log.Printf("🐘 Fetching Mastodon trends for keyword: %s", kw)
+
+		trends, err := ms.GetTrends(kw)
+		if err != nil {
+			log.Printf("⚠️ Mastodon fetch failed: %v", err)
+		} else {
+			mastodonTrends = trends
+		}
+	}
+
 	return c.Render(http.StatusOK, "index.html", map[string]interface{}{
-		"Articles": articles,
-		"Count":    len(articles),
+		"Articles":       articles,
+		"Count":          len(articles),
+		"MastodonTrends": mastodonTrends,
 	})
 }
 
