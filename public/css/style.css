@@ -587,6 +587,8 @@ footer {
     border: none;
     display: flex;
     flex-direction: column;
+    height: 360px;
+    /* Fixed height requested by user */
 }
 
 .mastodon-header {
@@ -597,6 +599,8 @@ footer {
     font-weight: 700;
     margin-bottom: 10px;
     opacity: 0.9;
+    flex-shrink: 0;
+    /* Header shouldn't shrink */
 }
 
 .mastodon-icon {
@@ -607,11 +611,15 @@ footer {
     flex: 1;
     position: relative;
     overflow: hidden;
+    min-height: 0;
+    /* Crucial for flex child scrolling */
 }
 
 .mastodon-slide {
     display: none;
     animation: fadeIn 0.5s ease;
+    height: 100%;
+    /* Fill carousel */
 }
 
 .mastodon-slide.active {
@@ -621,8 +629,26 @@ footer {
 .mastodon-content {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    /* justify-content: space-between; Removed to allow scrolling from top */
     height: 100%;
+    overflow-y: auto;
+    /* Enable vertical Scroll */
+    padding-right: 5px;
+    /* Space for scrollbar */
+}
+
+/* Custom Scrollbar for Mastodon Card */
+.mastodon-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.mastodon-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.mastodon-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 3px;
 }
 
 .post-text {

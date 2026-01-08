@@ -121,8 +121,10 @@ func handleHome(c echo.Context) error {
 	var articles []models.Article
 
 	result := database.DB.
+		Joins("JOIN feeds ON feeds.id = articles.feed_id AND feeds.deleted_at IS NULL").
 		Preload("Feed").
-		Order("score DESC, published_at DESC").
+		Where("articles.published_at > ?", time.Now().Add(-48*time.Hour)). // Only last 48 hours
+		Order("articles.score DESC, articles.published_at DESC").
 		Limit(100).
 		Find(&articles)
 

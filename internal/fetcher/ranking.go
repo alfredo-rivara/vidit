@@ -17,6 +17,7 @@ const (
 	WeightSitemap = 1.2
 	WeightAPI     = 1.0
 
+	WeightChile   = 1.0 // Boost for Chilean sources
 	WeightCluster = 2.5
 	GravityDecay  = 1.8
 
@@ -77,7 +78,7 @@ func (rs *RankingService) RankAndDedup(articles []models.Article) []models.Artic
 }
 
 func (rs *RankingService) calculateGravity(article models.Article, clusterCount int) float64 {
-	// Formula: Score = (PesoFuente + (ConteoCluster * PesoCluster)) / (HorasTranscurridas + 2)^Gravedad
+	// Formula: Score = (PesoFuente + BoostChile + (ConteoCluster * PesoCluster)) / (HorasTranscurridas + 2)^Gravedad
 
 	sourceWeight := WeightRSS
 	switch article.Feed.Type {
@@ -85,6 +86,11 @@ func (rs *RankingService) calculateGravity(article models.Article, clusterCount 
 		sourceWeight = WeightSitemap
 	case "newsapi":
 		sourceWeight = WeightAPI
+	}
+
+	// Boost Chilean sources
+	if article.Feed.Country == "CL" {
+		sourceWeight += WeightChile
 	}
 
 	hoursElapsed := time.Since(article.PublishedAt).Hours()
